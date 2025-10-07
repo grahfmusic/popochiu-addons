@@ -1,0 +1,24 @@
+[gd_resource type="ShaderMaterial" load_steps=2 format=3 uid="uid://c1p3qeba77ohr"]
+
+[ext_resource type="Shader" uid="uid://ftebqbjgldtp" path="res://addons/popochiu-addons/pfx/shaders/postfx_pipeline.shader.gdshader" id="1"]
+
+[resource]
+resource_local_to_scene = true
+shader = ExtResource("1")
+shader_parameter/fx_enabled = true
+shader_parameter/crt_enabled = true
+shader_parameter/crt_use_screen_uv = true
+shader_parameter/crt_resolution = Vector2(320, 180)
+shader_parameter/crt_scan_line_amount = 1.0
+shader_parameter/crt_warp_amount = 0.1
+shader_parameter/crt_noise_amount = 0.03
+shader_parameter/crt_interference_amount = 0.2
+shader_parameter/crt_grille_amount = 0.1
+shader_parameter/crt_grille_size = 1.0
+shader_parameter/crt_vignette_amount = 0.6
+shader_parameter/crt_vignette_intensity = 0.4
+shader_parameter/crt_aberration_amount = 0.5
+shader_parameter/crt_roll_line_amount = 0.3
+shader_parameter/crt_roll_speed = 1.0
+shader_parameter/crt_scan_line_strength = -8.0
+shader_parameter/crt_pixel_strength = -2.0
