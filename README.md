@@ -8,7 +8,7 @@ Add-on systems that layer cinematic presentation tools on top of Popochiu 2.0 wi
 1. Clone or copy this repository alongside your Popochiu project.
 2. Follow `INSTALLATION.md` to copy `addons/popochiu-addons/` into your project and enable the plugin.
 3. Run `/usr/bin/godot --path . --headless --run` from your project root to confirm resources and autoloads are wired correctly.
-4. Call `G.show_letterbox_preset("cinematic_235")` or `PFX.apply_config({"crt_enabled": true})` in-game to verify both systems are active.
+4. Call `G.show_letterbox_preset("cinematic_235")`, `G.fade_prop_in("Lamp", {"duration": 0.5})`, or `PFX.apply_config({"crt_enabled": true})` in-game to verify all systems are active.
 
 ---
 
@@ -17,9 +17,13 @@ Add-on systems that layer cinematic presentation tools on top of Popochiu 2.0 wi
   *Entry point:* `addons/popochiu-addons/gui/letterbox_gui.gd` / `addons/popochiu-addons/letterbox/`.  
   *Reference:* `POPOCHIU_ADDONS_DOCUMENTATION.md` (§5.1).
 
-- **PostFX Pipeline (CRT)** – CanvasLayer-based PostFX controller with configurable scanlines, noise, curvature, chromatic aberration, and room-scoped contexts.  
-  *Entry point:* `addons/popochiu-addons/pfx/pfx.gd` / `addons/popochiu-addons/pfx/controller/`.  
+- **PostFX Pipeline (CRT)** – CanvasLayer-based PostFX controller with configurable scanlines, noise, curvature, chromatic aberration, and room-scoped contexts.
+  *Entry point:* `addons/popochiu-addons/pfx/pfx.gd` / `addons/popochiu-addons/pfx/controller/`.
   *Reference:* `POPOCHIU_ADDONS_DOCUMENTATION.md` (§5.2).
+
+- **Prop Fade Helpers** – Popochiu-safe prop tween helpers that fade any `CanvasItem` by alpha with optional queue blocking.
+  *Entry point:* `addons/popochiu-addons/api/popochiu_helper.gd` / `addons/popochiu-addons/wrappers/popochiu_helper.gd`.
+  *Reference:* `POPOCHIU_ADDONS_DOCUMENTATION.md` (§5.3).
 
 Upcoming work (tracked in `addons/popochiu-addons/doc/to-do/`) includes audio layering, lighting presets, dialogue UX upgrades, and additional cinematic helpers.
 

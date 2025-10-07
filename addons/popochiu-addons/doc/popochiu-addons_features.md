@@ -41,11 +41,27 @@ This document enumerates every custom system layered on top of Popochiu so the s
   3. Ensure the Popochiu `G` autoload points to the wrapper (`res://addons/popochiu-addons/wrappers/g_autoload.gd`) so the Popochiu Addons API is available alongside the letterbox helpers.
   4. Verify the plugin assets under `addons/popochiu-addons/` remain intact and Popochiu's bundled addons stay untouched.
 
-## 3. Guidelines & Tooling Updates
+## 3. Prop Fade Helpers
+- **Core Files**
+  - `addons/popochiu-addons/api/g.gd` (base autoload exposing prop fade helpers)
+  - `addons/popochiu-addons/api/popochiu_helper.gd` (PopochiuAddonsHelper extension that mirrors the API)
+  - `addons/popochiu-addons/wrappers/popochiu_helper.gd` (autoload wrapper installed by the plugin)
+- Documentation cross-link: `POPOCHIU_ADDONS_DOCUMENTATION.md` (§5.3)
+- **Key Features**
+  - Tween-based fades for any Popochiu prop (`CanvasItem`) with configurable duration, transition, easing, and delay.
+  - Optional queue callables (`queue_fade_prop*`) for Popochiu command sequencing with built-in blocking semantics.
+  - Convenience wrappers for fade-in/out plus helper autoload access so gameplay scripts can call `PopochiuAddonsHelper.fade_prop(...)`.
+- **Porting Checklist**
+  1. Enable the plugin so the `PopochiuAddonsHelper` autoload is replaced with `addons/popochiu-addons/wrappers/popochiu_helper.gd`.
+  2. Update any custom helper overrides to extend `res://addons/popochiu-addons/api/popochiu_helper.gd`.
+  3. Confirm props you plan to fade inherit from `CanvasItem` (Sprites, Controls, etc.).
+  4. Exercise both blocking (`await G.fade_prop(...)`) and non-blocking fades plus queue callables after integration.
+
+## 4. Guidelines & Tooling Updates
 - `AGENTS.md` now reminds contributors to keep Popochiu modifications outside `addons/`.
 - `doc/letterbox_todo.md` keeps QA tasks visible.
 
-## 4. Migration Strategy for New Projects
+## 5. Migration Strategy for New Projects
 1. **Prepare Autoloads**: Copy `addons/popochiu-addons/wrappers/` (autoload + command wrappers), `addons/popochiu-addons/api/`, `addons/popochiu-addons/letterbox`, `addons/popochiu-addons/gui`, and `addons/popochiu-addons/pfx`, then register `G`/`PFX` in the target project.
 2. **GUI Integration**: Point the project GUI script to extend `res://addons/popochiu-addons/gui/letterbox_gui.gd` (or merge those helpers into an existing script).
 3. **Assets**: Move `addons/popochiu-addons/pfx/` directory (contains controller/shaders) and any additional textures referenced by presets.
@@ -53,12 +69,12 @@ This document enumerates every custom system layered on top of Popochiu so the s
 5. **Validation**: Follow the TODO checklist—exercise presets, queue helpers, and PFX combos.
 6. **Packaging**: Optionally wrap the system into a Godot plugin for plug-and-play use across Popochiu projects.
 
-## 5. Notes on Modularisation
+## 6. Notes on Modularisation
 - Popochiu's bundled addons stay untouched; all custom logic lives in `addons/popochiu-addons/` with thin wrappers in the game layer.
 - Any future feature should follow the same pattern: place reusable code under `addons/popochiu-addons/`, documentation under `doc/`, and record migration notes here.
 - If a change requires interacting with core Popochiu logic, consider subclassing or signal forwarding from the game layer instead of modifying the addon.
 
-## 6. Future Work
+## 7. Future Work
 - Build a tiny “cinematic showcase” room demonstrating letterbox + PFX combinations.
 - Polish the Popochiu Addons plugin metadata and publish install instructions for external projects.
 - Add automated headless tests that instantiate the controller, run a tween, and assert final bar offsets and modulate values.

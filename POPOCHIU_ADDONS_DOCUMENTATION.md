@@ -12,14 +12,14 @@ This guide is the canonical reference for the Popochiu Addons plugin. It complem
 2. [Getting Started](#2-getting-started)  
 3. [Plugin Architecture](#3-plugin-architecture)  
 4. [Core Runtime APIs](#4-core-runtime-apis)  
-5. [Module Deep Dives](#5-module-deep-dives)  
-6. [Integration Workflows](#6-integration-workflows)  
-7. [Configuration Reference](#7-configuration-reference)  
-8. [Testing & QA](#8-testing--qa)  
-9. [Debugging & Troubleshooting](#9-debugging--troubleshooting)  
-10. [Performance Notes](#10-performance-notes)  
-11. [Extensibility & Roadmap](#11-extensibility--roadmap)  
-12. [File Index](#12-file-index)  
+5. [Module Deep Dives](#5-module-deep-dives)
+6. [Integration Workflows](#6-integration-workflows)
+7. [Configuration Reference](#7-configuration-reference)
+8. [Testing & QA](#8-testing--qa)
+9. [Debugging & Troubleshooting](#9-debugging--troubleshooting)
+10. [Performance Notes](#10-performance-notes)
+11. [Extensibility & Roadmap](#11-extensibility--roadmap)
+12. [File Index](#12-file-index)
 13. [Appendix: Signals & Callbacks](#13-appendix-signals--callbacks)
 
 ---
@@ -29,6 +29,7 @@ This guide is the canonical reference for the Popochiu Addons plugin. It complem
 Popochiu Addons packages cinematic and presentation-focused systems that overlie Popochiu without touching its core scripts. It currently includes:
 - **Letterbox Overlay** – Runtime letterbox/pillarbox controller, preset catalogue, Popochiu queue helpers.
 - **PostFX Pipeline (CRT)** – Configurable post-processing layer with per-room contexts and Popochiu command hooks.
+- **Prop Fade Helpers** – Tween-based alpha fades for Popochiu props with queue-ready callables and optional blocking semantics.
 
 The plugin stays additive—wrappers expose optional helpers so project overrides remain thin. Every module is shippable on its own, but the combined stack unlocks modern audiovisual flourishes for Popochiu adventures.
 
@@ -70,6 +71,8 @@ Popochiu Project
 │    └─ Extends addons/popochiu-addons/api/g.gd
 │        ├─ Delegates Letterbox calls to gui/letterbox_gui.gd + letterbox_api.gd
 │        └─ Bridges PostFX helpers to autoload `PFX`
+├─ Autoload `PopochiuAddonsHelper` -> addons/popochiu-addons/wrappers/popochiu_helper.gd
+│    └─ Extends addons/popochiu-addons/api/popochiu_helper.gd and forwards to `G`
 ├─ Autoload `PFX` -> addons/popochiu-addons/pfx/pfx.gd
 │    └─ Spawns/maintains CanvasLayer controllers per context
 ├─ GUI script -> extends addons/popochiu-addons/gui/letterbox_gui.gd
@@ -104,6 +107,10 @@ Key methods (full signatures in [Appendix](#13-appendix-signals--callbacks)):
 - `clear_pfx_config(context := "global")` / `clear_pfx_room_config(room: Node, context := "")`
 - `register_pfx_room_default(script_name: String, config := {})`
 - `get_pfx_room_default(script_name: String) -> Dictionary`
+- `fade_prop(prop, target_alpha: float, config := {})`
+- `fade_prop_in(prop, config := {})` / `fade_prop_out(prop, config := {})`
+- `queue_fade_prop(prop, target_alpha: float, config := {})`
+- `queue_fade_prop_in(prop, config := {})` / `queue_fade_prop_out(prop, config := {})`
 
 ### 4.2 `PFX` Autoload Highlights
 - Manages a cache of PostFX controllers keyed by `context` strings (`"global"`, room-specific contexts, etc.).
@@ -362,6 +369,63 @@ Popochiu.queue([
 
 ---
 
+### 5.3 Prop Fade Helpers
+
+`addons/popochiu-addons/api/g.gd` now exposes convenience tweens for fading Popochiu props (any `CanvasItem`) in and out by animating the `modulate.a` channel. The helper respects Popochiu’s queue expectations (blocking vs non-blocking) and mirrors its API on the `PopochiuAddonsHelper` autoload.
+
+**Installation & Migration**
+1. Ensure the plugin is enabled so the `PopochiuAddonsHelper` autoload points to `addons/popochiu-addons/wrappers/popochiu_helper.gd` (handled automatically in Godot → Project Settings → Plugins).
+2. Projects with custom helper overrides should extend `res://addons/popochiu-addons/api/popochiu_helper.gd` to inherit the fade helpers.
+3. No scene changes are required—helpers operate directly on existing prop instances.
+
+**Runtime API**
+```gdscript
+G.fade_prop(prop_or_name, 0.0, {"duration": 0.5})
+G.fade_prop_in(prop_or_name, {"duration": 0.75, "transition": Tween.TRANS_SINE})
+G.fade_prop_out(prop_or_name, {"hide_on_finish": true})
+await G.queue_fade_prop_in(prop_or_name, {"wait": true})()
+
+PopochiuAddonsHelper.fade_prop("Lamp", 0.2, {"delay": 0.1, "blocking": false})
+PopochiuAddonsHelper.queue_fade_prop_out("Lamp", {"wait": true, "hide_on_finish": true})
+```
+
+`prop_or_name` accepts:
+- A direct `CanvasItem` (e.g., `Sprite2D`, `Control`),
+- A Popochiu `Prop` node,
+- A prop name string/`StringName` if `G.get_prop` (or `get_prop_node`) is available.
+
+**Configuration Keys**
+| Key | Type | Default | Notes |
+|-----|------|---------|-------|
+| `duration` | `float` | `0.4` | Seconds for the tween; `0` snaps immediately. |
+| `transition` | `Tween.TransitionType` | `Tween.TRANS_LINEAR` | Curve applied to the alpha tween. |
+| `ease` | `Tween.EaseType` | `Tween.EASE_IN_OUT` | Easing used with the transition curve. |
+| `delay` | `float` | `0.0` | Seconds to wait before the tween starts. |
+| `blocking` | `bool` | `true` | When true the helper awaits tween completion. Queue helpers force blocking semantics. |
+| `ensure_visible` | `bool` | `target_alpha > 0.0` | Forces `visible = true` before fading in. |
+| `hide_on_finish` | `bool` | `target_alpha <= 0.0` | Automatically hides the node after fading out. |
+| `from_alpha` | `float`/`null` | `null` | Optional starting alpha applied before tweening. |
+
+**Queue Integration**
+Queue helpers return callables compatible with `Popochiu.queue`:
+```gdscript
+Popochiu.queue([
+    G.queue_fade_prop_out("Spotlight", {"wait": true, "duration": 0.6}),
+    func():
+        G.show_system_text("The lamp flickers out."),
+    G.queue_fade_prop_in("Spotlight", {"wait": true, "duration": 0.4, "ensure_visible": true})
+])
+```
+
+**Debugging Tips**
+- Ensure props inherit from `CanvasItem`—3D nodes without a `modulate` property will be ignored.
+- Zero-duration fades apply instantly; combine with `hide_on_finish = true` when removing props without tweens.
+- When using prop names, confirm `G.get_prop` or `get_prop_node` returns the expected node in your Popochiu version.
+
+**Performance**: Tweens run on individual props and allocate a single `Tween` instance per call; fades are effectively free unless hundreds run simultaneously.
+
+---
+
 ---
 
 ## 6. Integration Workflows
@@ -446,6 +510,20 @@ Preset catalogue and usage examples appear in §5.1.
 
 Section 5.2 expands on each parameter family with usage tips and code examples.
 
+### 7.3 Prop Fade Keys
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| `duration` | `float` | `0.4` | Seconds spent tweening to the target alpha. |
+| `transition` | `Tween.TransitionType` | `Tween.TRANS_LINEAR` | Tween curve driving the fade. |
+| `ease` | `Tween.EaseType` | `Tween.EASE_IN_OUT` | Ease applied to the transition curve. |
+| `delay` | `float` | `0.0` | Delay before the tween begins. |
+| `blocking` | `bool` | `true` | Await tween completion; queue helpers force `true`. |
+| `ensure_visible` | `bool` | `target_alpha > 0.0` | Ensures `visible = true` before fading in. |
+| `hide_on_finish` | `bool` | `target_alpha <= 0.0` | Calls `visible = false` after fading out. |
+| `from_alpha` | `float`/`null` | `null` | Optional starting alpha override. |
+
+See §5.3 for examples and queue integration patterns.
+
 ---
 
 ## 8. Testing & QA
@@ -506,6 +584,7 @@ Extension tips:
 | Path | Purpose |
 |------|---------|
 | `addons/popochiu-addons/api/g.gd` | Core autoload API consumed by wrapper `G`. |
+| `addons/popochiu-addons/api/popochiu_helper.gd` | Adds prop fade helpers mirrored by the PopochiuAddonsHelper autoload. |
 | `addons/popochiu-addons/api/gui_commands.gd` | Popochiu command helpers (forward commands to runtime). |
 | `addons/popochiu-addons/gui/letterbox_gui.gd` | GUI base script instantiating the letterbox controller. |
 | `addons/popochiu-addons/letterbox/letterbox_controller.gd` | Handles letterbox tweens, signals, and blocking state. |
@@ -515,6 +594,7 @@ Extension tips:
 | `addons/popochiu-addons/pfx/shaders/postfx_pipeline.shader.gdshader` | CRT post-processing shader. |
 | `addons/popochiu-addons/pfx/shaders/postfx_pipeline.tres` | Base material duplicated for each controller instance. |
 | `addons/popochiu-addons/wrappers/g_autoload.gd` | Drop-in autoload that extends `api/g.gd`. |
+| `addons/popochiu-addons/wrappers/popochiu_helper.gd` | Drop-in autoload that extends `api/popochiu_helper.gd`. |
 | `addons/popochiu-addons/wrappers/gui_commands_wrapper.gd` | Command wrapper extending `api/gui_commands.gd`. |
 | `INSTALLATION.md` | Root-level quick-start checklist for installing the plugin. |
 | `POPOCHIU_ADDONS_DOCUMENTATION.md` | Comprehensive technical reference for the plugin. |
