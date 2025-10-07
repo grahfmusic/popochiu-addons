@@ -71,7 +71,7 @@ Popochiu Project
 │    └─ Extends addons/popochiu-addons/api/g.gd
 │        ├─ Delegates Letterbox calls to gui/letterbox_gui.gd + letterbox_api.gd
 │        └─ Bridges PostFX helpers to autoload `PFX`
-├─ Autoload `PopochiuAddonsHelper` -> addons/popochiu-addons/wrappers/popochiu_helper.gd
+├─ Autoload `PopochiuHelper` -> addons/popochiu-addons/wrappers/popochiu_helper.gd
 │    └─ Extends addons/popochiu-addons/api/popochiu_helper.gd and forwards to `G`
 ├─ Autoload `PFX` -> addons/popochiu-addons/pfx/pfx.gd
 │    └─ Spawns/maintains CanvasLayer controllers per context
@@ -371,10 +371,10 @@ Popochiu.queue([
 
 ### 5.3 Prop Fade Helpers
 
-`addons/popochiu-addons/api/g.gd` now exposes convenience tweens for fading Popochiu props (any `CanvasItem`) in and out by animating the `modulate.a` channel. The helper respects Popochiu’s queue expectations (blocking vs non-blocking) and mirrors its API on the `PopochiuAddonsHelper` autoload.
+`addons/popochiu-addons/api/g.gd` now exposes convenience tweens for fading Popochiu props (any `CanvasItem`) in and out by animating the `modulate.a` channel. The helper respects Popochiu’s queue expectations (blocking vs non-blocking) and mirrors its API on the `PopochiuHelper` autoload.
 
 **Installation & Migration**
-1. Ensure the plugin is enabled so the `PopochiuAddonsHelper` autoload points to `addons/popochiu-addons/wrappers/popochiu_helper.gd` (handled automatically in Godot → Project Settings → Plugins).
+1. Ensure the plugin is enabled so the `PopochiuHelper` autoload points to `addons/popochiu-addons/wrappers/popochiu_helper.gd` (handled automatically in Godot → Project Settings → Plugins).
 2. Projects with custom helper overrides should extend `res://addons/popochiu-addons/api/popochiu_helper.gd` to inherit the fade helpers.
 3. No scene changes are required—helpers operate directly on existing prop instances.
 
@@ -385,8 +385,8 @@ G.fade_prop_in(prop_or_name, {"duration": 0.75, "transition": Tween.TRANS_SINE})
 G.fade_prop_out(prop_or_name, {"hide_on_finish": true})
 await G.queue_fade_prop_in(prop_or_name, {"wait": true})()
 
-PopochiuAddonsHelper.fade_prop("Lamp", 0.2, {"delay": 0.1, "blocking": false})
-PopochiuAddonsHelper.queue_fade_prop_out("Lamp", {"wait": true, "hide_on_finish": true})
+PopochiuHelper.fade_prop("Lamp", 0.2, {"delay": 0.1, "blocking": false})
+PopochiuHelper.queue_fade_prop_out("Lamp", {"wait": true, "hide_on_finish": true})
 ```
 
 `prop_or_name` accepts:
@@ -584,7 +584,7 @@ Extension tips:
 | Path | Purpose |
 |------|---------|
 | `addons/popochiu-addons/api/g.gd` | Core autoload API consumed by wrapper `G`. |
-| `addons/popochiu-addons/api/popochiu_helper.gd` | Adds prop fade helpers mirrored by the PopochiuAddonsHelper autoload. |
+| `addons/popochiu-addons/api/popochiu_helper.gd` | Adds prop fade helpers mirrored by the PopochiuHelper autoload. |
 | `addons/popochiu-addons/api/gui_commands.gd` | Popochiu command helpers (forward commands to runtime). |
 | `addons/popochiu-addons/gui/letterbox_gui.gd` | GUI base script instantiating the letterbox controller. |
 | `addons/popochiu-addons/letterbox/letterbox_controller.gd` | Handles letterbox tweens, signals, and blocking state. |

@@ -65,7 +65,7 @@ In Godot open `Project → Project Settings → Plugins` and enable **Popochiu A
 When enabled, the plugin registers these autoloads:
 - `PFX="*res://addons/popochiu-addons/pfx/pfx.gd"`
 - `G="*res://addons/popochiu-addons/wrappers/g_autoload.gd"`
-- `PopochiuAddonsHelper="*res://addons/popochiu-addons/wrappers/popochiu_helper.gd"`
+- `PopochiuHelper="*res://addons/popochiu-addons/wrappers/popochiu_helper.gd"`
 
 Previous autoload configurations are stored in `ProjectSettings["addons/popochiu-addons/autoload_backups"]` in case you need to revert.
 

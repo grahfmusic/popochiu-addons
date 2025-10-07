@@ -44,15 +44,15 @@ This document enumerates every custom system layered on top of Popochiu so the s
 ## 3. Prop Fade Helpers
 - **Core Files**
   - `addons/popochiu-addons/api/g.gd` (base autoload exposing prop fade helpers)
-  - `addons/popochiu-addons/api/popochiu_helper.gd` (PopochiuAddonsHelper extension that mirrors the API)
+  - `addons/popochiu-addons/api/popochiu_helper.gd` (PopochiuHelper extension that mirrors the API)
   - `addons/popochiu-addons/wrappers/popochiu_helper.gd` (autoload wrapper installed by the plugin)
 - Documentation cross-link: `POPOCHIU_ADDONS_DOCUMENTATION.md` (§5.3)
 - **Key Features**
   - Tween-based fades for any Popochiu prop (`CanvasItem`) with configurable duration, transition, easing, and delay.
   - Optional queue callables (`queue_fade_prop*`) for Popochiu command sequencing with built-in blocking semantics.
-  - Convenience wrappers for fade-in/out plus helper autoload access so gameplay scripts can call `PopochiuAddonsHelper.fade_prop(...)`.
+  - Convenience wrappers for fade-in/out plus helper autoload access so gameplay scripts can call `PopochiuHelper.fade_prop(...)`.
 - **Porting Checklist**
-  1. Enable the plugin so the `PopochiuAddonsHelper` autoload is replaced with `addons/popochiu-addons/wrappers/popochiu_helper.gd`.
+  1. Enable the plugin so the `PopochiuHelper` autoload is replaced with `addons/popochiu-addons/wrappers/popochiu_helper.gd`.
   2. Update any custom helper overrides to extend `res://addons/popochiu-addons/api/popochiu_helper.gd`.
   3. Confirm props you plan to fade inherit from `CanvasItem` (Sprites, Controls, etc.).
   4. Exercise both blocking (`await G.fade_prop(...)`) and non-blocking fades plus queue callables after integration.
