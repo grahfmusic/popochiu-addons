@@ -64,6 +64,7 @@ In Godot open `Project → Project Settings → Plugins` and enable **Popochiu A
 When enabled, the plugin registers these autoloads:
 - `PFX="*res://addons/popochiu-addons/pfx/pfx.gd"`
 - `G="*res://addons/popochiu-addons/wrappers/g_autoload.gd"`
+- `PopochiuHelper="*res://addons/popochiu-addons/wrappers/popochiu_helper.gd"`
 
 Previous autoload configurations are stored in `ProjectSettings["addons/popochiu-addons/autoload_backups"]` in case you need to revert.
 
@@ -71,6 +72,7 @@ Previous autoload configurations are stored in `ProjectSettings["addons/popochiu
 Update your project-level scripts so they extend the plugin utilities:
 - GUI script: `extends "res://addons/popochiu-addons/gui/letterbox_gui.gd"`
 - Autoload override (if you manage `G` manually): `extends "res://addons/popochiu-addons/api/g.gd"`
+- Helper override (if you ship a custom one): `extends "res://addons/popochiu-addons/api/popochiu_helper.gd"`
 - Command script (optional): `extends "res://addons/popochiu-addons/wrappers/gui_commands_wrapper.gd"`
 
 If you maintain custom scripts, copy the required helper logic (letterbox transitions, PostFX hooks) into your overrides.
